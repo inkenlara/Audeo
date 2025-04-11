@@ -67,7 +67,7 @@ def inference(net, intervals, data, est_roll_folder):
             torch_input_img, torch_label = torch_preprocess(file_list, label)
             logits = net(torch.unsqueeze(torch_input_img,dim=0))
             pred_label = torch.sigmoid(logits) >= 0.4
-            numpy_pre_label = pred_label.cpu().detach().numpy().astype(np.int)
+            numpy_pre_label = pred_label.cpu().detach().numpy().astype(int)
             numpy_logit = logits.cpu().detach().numpy()
             save_est_roll.append(numpy_pre_label)
             save_est_logit.append(numpy_logit)

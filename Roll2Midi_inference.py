@@ -64,7 +64,7 @@ class Midi_Generation():
                 gen_img = model(roll_)
                 gen_img = gen_img >= 0.5
 
-                numpy_pre_label = gen_img.cpu().detach().numpy().astype(np.int) # 1,1,88,100
+                numpy_pre_label = gen_img.cpu().detach().numpy().astype(int) # 1,1,88,100
                 numpy_pre_label = np.transpose(numpy_pre_label.squeeze(), (1, 0))  # 100,88
 
                 test_results.append(numpy_pre_label[:self.frame, :])

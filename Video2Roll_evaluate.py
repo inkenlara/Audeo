@@ -22,8 +22,8 @@ def validate(net, criterion, test_loader):
             logits = net(imgs)
             loss = criterion(logits, label)
             pred_label = torch.sigmoid(logits) >= 0.4
-            numpy_label = label.cpu().detach().numpy().astype(np.int)
-            numpy_pre_label = pred_label.cpu().detach().numpy().astype(np.int)
+            numpy_label = label.cpu().detach().numpy().astype(int)
+            numpy_pre_label = pred_label.cpu().detach().numpy().astype(int)
             all_label.append(numpy_label)
             all_pred_label.append(numpy_pre_label)
             epoch_loss += loss.item()

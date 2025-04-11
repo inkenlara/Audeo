@@ -99,8 +99,8 @@ class Solver(object):
             loss = self.criterion(logits,label)
             # set the threshold of the logits
             pred_label = torch.sigmoid(logits) >= 0.4
-            numpy_label = label.cpu().detach().numpy().astype(np.int)
-            numpy_pre_label = pred_label.cpu().detach().numpy().astype(np.int)
+            numpy_label = label.cpu().detach().numpy().astype(int)
+            numpy_pre_label = pred_label.cpu().detach().numpy().astype(int)
 
             precision = metrics.precision_score(numpy_label,numpy_pre_label, average='samples', zero_division=1)
             recall = metrics.recall_score(numpy_label,numpy_pre_label, average='samples', zero_division=1)
@@ -133,8 +133,8 @@ class Solver(object):
                 logits = self.net(imgs)
                 loss = self.criterion(logits, label)
                 pred_label = torch.sigmoid(logits) >= 0.4
-                numpy_label = label.cpu().detach().numpy().astype(np.int)
-                numpy_pre_label = pred_label.cpu().detach().numpy().astype(np.int)
+                numpy_label = label.cpu().detach().numpy().astype(int)
+                numpy_pre_label = pred_label.cpu().detach().numpy().astype(int)
                 all_label.append(numpy_label)
                 all_pred_label.append(numpy_pre_label)
                 epoch_loss += loss.item()

@@ -55,8 +55,6 @@ class Video2RollDataset(Dataset):
             return len(self.data['test'])
 
     def load_data(self):
-        # self.folders: dictionary
-        # key: train/test, values: list of tuples [(video_i_image_folder, video_i_label_folder)]
         self.folders = {}
 
         train_img_folder = sorted(glob.glob(self.img_root + '/training/*'))
@@ -64,65 +62,51 @@ class Video2RollDataset(Dataset):
         train_label_folder = sorted(glob.glob(self.label_root + '/training/*'))
         test_label_folder = sorted(glob.glob(self.label_root + '/testing/*'))
 
-
-        self.folders['train'] = [(train_img_folder[i],train_label_folder[i]) for i in range(len(train_img_folder))]
+        self.folders['train'] = [(train_img_folder[i], train_label_folder[i]) for i in range(len(train_img_folder))]
         print(self.folders['train'])
-        self.folders['test'] = [(test_img_folder[i],test_label_folder[i]) for i in range(len(test_img_folder))]
+        self.folders['test'] = [(test_img_folder[i], test_label_folder[i]) for i in range(len(test_img_folder))]
         print(self.folders['test'])
 
-        # self.data: dictionary
-        # key: train/test, value: list of tuples [([frame_{i-2, i+2}_image_filename], frame_i_label)]
-        self.data = {}
-        self.data['train'] = []
-        self.data['test'] = []
+        self.data = {'train': [], 'test': []}
         self.train_labels = []
         count_zero = 0
-        # load train data
+
+        # === Training Data ===
         for img_folder, label_file in self.folders['train']:
-            # each folder contains all image frames of one video, format: frame{number}.jpg
-            img_files = sorted(glob.glob(img_folder + '/*.jpg'))
-            # label is a pkl file. The key is frame number, value is the label vector of 88 dim
+            img_files = sorted(glob.glob(img_folder + '/*.jpg'), key=lambda x: int(os.path.basename(x)[5:-4]))
             labels = np.load(label_file, allow_pickle=True)
             for i, file in enumerate(img_files):
                 key = int(os.path.basename(file)[5:-4])
                 label = np.where(labels[key] > 0, 1, 0)
-                # count the number of frames that no key is activate
                 if not np.any(label):
                     count_zero += 1
-                    # continue
                 new_label = label[self.min_key:self.max_key + 1]
-                if i >= 2 and i<len(img_files)-2:
-                    file_list = [img_files[i-2], img_files[i-1], file, img_files[i+1],img_files[i+2]]
-                else:
-                    continue
-                self.data['train'].append((file_list, new_label))
-                self.train_labels.append(new_label)
+                if i >= 2 and i < len(img_files) - 2:
+                    file_list = [img_files[i-2], img_files[i-1], file, img_files[i+1], img_files[i+2]]
+                    self.data['train'].append((file_list, new_label))
+                    self.train_labels.append(new_label)
         print("number of all zero label in training:", count_zero)
         self.train_labels = np.asarray(self.train_labels)
-        count_zero = 0
 
-        # load test data
+        # === Test Data ===
+        count_zero = 0
         for img_folder, label_file in self.folders['test']:
-            img_files = glob.glob(img_folder + '/*.jpg')
-            img_files.sort(key=lambda x: int(x.split('/')[4].split('.')[0][5:]))
+            img_files = sorted(glob.glob(img_folder + '/*.jpg'), key=lambda x: int(os.path.basename(x)[5:-4]))
             labels = np.load(label_file, allow_pickle=True)
             for i, file in enumerate(img_files):
-                key = int(file.split('/')[4].split('.')[0][5:])
+                key = int(os.path.basename(file)[5:-4])
                 label = np.where(labels[key] > 0, 1, 0)
                 if not np.any(label):
                     count_zero += 1
-                    # continue
                 new_label = label[self.min_key:self.max_key + 1]
-                if i >= 2 and i<len(img_files)-2:
-                    file_list = [img_files[i-2], img_files[i-1], file, img_files[i+1],img_files[i+2]]
-                else:
-                    continue
-                self.data['test'].append((file_list, new_label))
+                if i >= 2 and i < len(img_files) - 2:
+                    file_list = [img_files[i-2], img_files[i-1], file, img_files[i+1], img_files[i+2]]
+                    self.data['test'].append((file_list, new_label))
         print("number of all zero label in testing:", count_zero)
 
+        print("length of training data:", len(self.data['train']))
+        print("length of testing data:", len(self.data['test']))
 
-        print("length of training data:",len(self.data['train']))
-        print("length of testing data:",len(self.data['test']))
 
 if __name__ == "__main__":
     dataset = Video2RollDataset(subset='train')

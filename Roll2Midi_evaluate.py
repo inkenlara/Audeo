@@ -32,17 +32,17 @@ def test(generator,  test_loader):
             gen_imgs = generator(roll_)
 
             pred_label = gen_imgs >= 0.4
-            numpy_label = gt.cpu().detach().numpy().astype(np.int) # B,1, 51, 50
+            numpy_label = gt.cpu().detach().numpy().astype(int) # B,1, 51, 50
             numpy_label = np.transpose(numpy_label.squeeze(), (0, 2, 1))  # B,50,51
             numpy_label = np.reshape(numpy_label, (-1, 51))
-            numpy_pre_label = pred_label.cpu().detach().numpy().astype(np.int)
+            numpy_pre_label = pred_label.cpu().detach().numpy().astype(int)
             numpy_pre_label = np.transpose(numpy_pre_label.squeeze(), (0, 2, 1)) #B,50,51
             numpy_pre_label = np.reshape(numpy_pre_label, (-1, 51))
             all_label.append(numpy_label)
             all_pred_label.append(numpy_pre_label)
 
             pred_label_ = gen_imgs >= 0.5
-            numpy_pre_label_ = pred_label_.cpu().detach().numpy().astype(np.int)
+            numpy_pre_label_ = pred_label_.cpu().detach().numpy().astype(int)
             numpy_pre_label_ = np.transpose(numpy_pre_label_.squeeze(), (0, 2, 1))  # B,50,51
             numpy_pre_label_ = np.reshape(numpy_pre_label_, (-1, 51))
             all_pred_label_.append(numpy_pre_label_)
