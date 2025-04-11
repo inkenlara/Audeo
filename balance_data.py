@@ -2,7 +2,6 @@ import random
 import numpy as np
 import torch
 from torch.utils.data.sampler import Sampler
-# torch.cuda.set_device(1)
 
 class MultilabelBalancedRandomSampler(Sampler):
     """
@@ -31,21 +30,19 @@ class MultilabelBalancedRandomSampler(Sampler):
         self.indices = indices
         if self.indices is None:
             self.indices = range(len(labels))
+
         self.map = []
         for class_ in range(self.labels.shape[1]):
             lst = np.where(self.labels[:, class_] == 1)[0]
             lst = lst[np.isin(lst, self.indices)]
             self.map.append(lst)
-        all_zero = []
-        for row in range(self.labels.shape[0]):
-            if not np.any(labels[row]):
-                all_zero.append(row)
 
-        print("all zero sample number is: ",len(all_zero))
-        self.map.append(all_zero)
         print("counting-----")
         for i in range(len(self.map)):
-            print("class {0} has {1} samples:".format(i,len(self.map[i])))
+            print(f"class {i} has {len(self.map[i])} samples:")
+
+        # Only use classes that have samples
+        self.valid_classes = [i for i, idxs in enumerate(self.map) if len(idxs) > 0]
 
         assert class_choice in ["random", "cycle"]
         self.class_choice = class_choice
@@ -56,7 +53,6 @@ class MultilabelBalancedRandomSampler(Sampler):
         return self
 
     def __next__(self):
-        # if self.count >= len(self.indices):
         if self.count >= 20000:
             raise StopIteration
         self.count += 1
@@ -64,28 +60,13 @@ class MultilabelBalancedRandomSampler(Sampler):
 
     def sample(self):
         if self.class_choice == "random":
-            class_ = random.randint(0, self.labels.shape[1])# - 1)
-            # print(class_)
+            class_ = random.choice(self.valid_classes)
         elif self.class_choice == "cycle":
-            class_ = self.current_class
-            self.current_class = (self.current_class + 1) % self.labels.shape[1]
+            class_ = self.valid_classes[self.current_class]
+            self.current_class = (self.current_class + 1) % len(self.valid_classes)
+
         class_indices = self.map[class_]
         return np.random.choice(class_indices)
 
     def __len__(self):
         return 20000
-        # return len(self.indices)
-
-# if __name__ == "__main__":
-#     train_dataset = Video2RollDataset(subset='train')
-#     train_sampler = MultilabelBalancedRandomSampler(train_dataset.train_labels)
-#     train_data_loader = DataLoader(train_dataset, batch_size=64, sampler=train_sampler)
-#     for i, data in enumerate(train_data_loader):
-#         print(i)
-#         imgs,label,ref_imgs,rng = data
-#         print(torch.unique(torch.nonzero(label)[:,1]))
-#         for j in range(len(label)):
-#             if label[j].sum()==0:
-#                 print("yes")
-#         if i == 1:
-#             break

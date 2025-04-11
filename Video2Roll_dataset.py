@@ -1,5 +1,6 @@
 import numpy as np
 import glob
+import os
 import matplotlib.pyplot as plt
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
@@ -13,7 +14,7 @@ transform = transforms.Compose([lambda x: x.resize((900,100)),
                                lambda x: x/255.])
 
 class Video2RollDataset(Dataset):
-    def __init__(self, img_root='./input_images',label_root='./labels', transform = transform, subset='train', device='cuda'):
+    def __init__(self, img_root='./data/input_images',label_root='./data/labels', transform = transform, subset='train', device='cuda'):
         self.img_root = img_root #images root dir
         self.label_root = label_root #labels root dir
         self.transform = transform
@@ -58,14 +59,11 @@ class Video2RollDataset(Dataset):
         # key: train/test, values: list of tuples [(video_i_image_folder, video_i_label_folder)]
         self.folders = {}
 
-        train_img_folder = glob.glob(self.img_root+'/training/*')
-        train_img_folder.sort(key=lambda x:int(x.split('/')[3].split(' ')[4].split('.')[1]))
-        test_img_folder = glob.glob(self.img_root+'/testing/*')
-        test_img_folder.sort(key=lambda x:int(x.split('/')[3].split(' ')[4].split('.')[1]))
-        train_label_folder = glob.glob(self.label_root+'/training/*')
-        train_label_folder.sort(key=lambda x: int(x.split('/')[3].split(' ')[4].split('.')[1]))
-        test_label_folder = glob.glob(self.label_root+'/testing/*')
-        test_label_folder.sort(key=lambda x: int(x.split('/')[3].split(' ')[4].split('.')[1]))
+        train_img_folder = sorted(glob.glob(self.img_root + '/training/*'))
+        test_img_folder = sorted(glob.glob(self.img_root + '/testing/*'))
+        train_label_folder = sorted(glob.glob(self.label_root + '/training/*'))
+        test_label_folder = sorted(glob.glob(self.label_root + '/testing/*'))
+
 
         self.folders['train'] = [(train_img_folder[i],train_label_folder[i]) for i in range(len(train_img_folder))]
         print(self.folders['train'])
@@ -82,12 +80,11 @@ class Video2RollDataset(Dataset):
         # load train data
         for img_folder, label_file in self.folders['train']:
             # each folder contains all image frames of one video, format: frame{number}.jpg
-            img_files = glob.glob(img_folder + '/*.jpg')
-            img_files.sort(key=lambda x: int(x.split('/')[4].split('.')[0][5:]))
+            img_files = sorted(glob.glob(img_folder + '/*.jpg'))
             # label is a pkl file. The key is frame number, value is the label vector of 88 dim
             labels = np.load(label_file, allow_pickle=True)
             for i, file in enumerate(img_files):
-                key = int(file.split('/')[4].split('.')[0][5:])
+                key = int(os.path.basename(file)[5:-4])
                 label = np.where(labels[key] > 0, 1, 0)
                 # count the number of frames that no key is activate
                 if not np.any(label):
@@ -144,5 +141,5 @@ if __name__ == "__main__":
         # plt.show()
         # print(torch.nonzero(label, as_tuple=True))
         print(torch.unique(torch.nonzero(label)[:,1]))
-        if i==3:
+        if i==10:
             break
