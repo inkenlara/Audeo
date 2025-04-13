@@ -3,6 +3,8 @@ import numpy as np
 import torch
 from torch.utils.data.sampler import Sampler
 
+LEN = 1000
+
 class MultilabelBalancedRandomSampler(Sampler):
     """
     MultilabelBalancedRandomSampler: Given a multilabel dataset of length n_samples and
@@ -49,14 +51,17 @@ class MultilabelBalancedRandomSampler(Sampler):
         self.current_class = 0
 
     def __iter__(self):
-        self.count = 0
-        return self
+        # Create a fresh generator each time.
+        for _ in range(LEN):
+            yield self.sample()
 
-    def __next__(self):
-        if self.count >= 20000:
-            raise StopIteration
-        self.count += 1
-        return self.sample()
+    # def __next__(self):
+    #     print("count:", self.count)
+    #     if self.count >= LEN:
+    #         print("stop iteration")
+    #         raise StopIteration
+    #     self.count += 1
+    #     return self.sample()
 
     def sample(self):
         if self.class_choice == "random":
@@ -69,4 +74,4 @@ class MultilabelBalancedRandomSampler(Sampler):
         return np.random.choice(class_indices)
 
     def __len__(self):
-        return 20000
+        return LEN
