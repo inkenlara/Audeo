@@ -1,0 +1,137 @@
+{
+  "_3qnL9ddHuw": {
+    "id": "_3qnL9ddHuw",
+    "label_file": "Bach Prelude and Fugue No.1 B1.pkl",
+    "section": "train"
+  },
+  "HB8-w5CvMls": {
+    "id": "HB8-w5CvMls",
+    "label_file": "Bach Prelude and Fugue No.2 B1.pkl",
+    "section": "train"
+  },
+  "vGdV4mJhaKU": {
+    "id": "vGdV4mJhaKU",
+    "label_file": "Bach Prelude and Fugue No.3 B1.pkl",
+    "section": "train"
+  },
+  "W5lOLZsjOp8": {
+    "id": "W5lOLZsjOp8",
+    "label_file": "Bach Prelude and Fugue No.4 B1.pkl",
+    "section": "train"
+  },
+  "vHi3_k4XOrA": {
+    "id": "vHi3_k4XOrA",
+    "label_file": "Bach Prelude and Fugue No.5 B1.pkl",
+    "section": "train"
+  },
+  "PIS76X17Mf8": {
+    "id": "PIS76X17Mf8",
+    "label_file": "Bach Prelude and Fugue No.6 B1.pkl",
+    "section": "train"
+  },
+  "DMdJLEGrUrg": {
+    "id": "DMdJLEGrUrg",
+    "label_file": "Bach Prelude and Fugue No.7 B1.pkl",
+    "section": "train"
+  },
+  "xXwCryMItHs": {
+    "id": "xXwCryMItHs",
+    "label_file": "Bach Prelude and Fugue No.8 B1.pkl",
+    "section": "train"
+  },
+  "49dCBsIGsgY": {
+    "id": "49dCBsIGsgY",
+    "label_file": "Bach Prelude and Fugue No.9 B1.pkl",
+    "section": "train"
+  },
+  "OZVMVVQPPPI": {
+    "id": "OZVMVVQPPPI",
+    "label_file": "Bach Prelude and Fugue No.10 B1.pkl",
+    "section": "train"
+  },
+  "cAnmwgC-JRw": {
+    "id": "cAnmwgC-JRw",
+    "label_file": "Bach Prelude and Fugue No.11 B1.pkl",
+    "section": "train"
+  },
+  "w77mBaWOOh0": {
+    "id": "w77mBaWOOh0",
+    "label_file": "Bach Prelude and Fugue No.12 B1.pkl",
+    "section": "train"
+  },
+  "MGMxImcYhiI": {
+    "id": "MGMxImcYhiI",
+    "label_file": "Bach Prelude and Fugue No.13 B1.pkl",
+    "section": "train"
+  },
+  "WqFyqbD9VEQ": {
+    "id": "WqFyqbD9VEQ",
+    "label_file": "Bach Prelude and Fugue No.14 B1.pkl",
+    "section": "train"
+  },
+  "V0P_2QG84MM": {
+    "id": "V0P_2QG84MM",
+    "label_file": "Bach Prelude and Fugue No.15 B1.pkl",
+    "section": "train"
+  },
+  "1eEcy3MgqxA": {
+    "id": "1eEcy3MgqxA",
+    "label_file": "Bach Prelude and Fugue No.16 B1.pkl",
+    "section": "train"
+  },
+  "GH-kkZQQ8G8": {
+    "id": "GH-kkZQQ8G8",
+    "label_file": "Bach Prelude and Fugue No.17 B1.pkl",
+    "section": "train"
+  },
+  "Kk58v56rD0s": {
+    "id": "Kk58v56rD0s",
+    "label_file": "Bach Prelude and Fugue No.18 B1.pkl",
+    "section": "train"
+  },
+  "WWqRR7RZGXw": {
+    "id": "WWqRR7RZGXw",
+    "label_file": "Bach Prelude and Fugue No.19 B1.pkl",
+    "section": "train"
+  },
+  "ouhp7O3Sz8M": {
+    "id": "ouhp7O3Sz8M",
+    "label_file": "Bach Prelude and Fugue No.20 B1.pkl",
+    "section": "train"
+  },
+  "U0v4CckNE68": {
+    "id": "U0v4CckNE68",
+    "label_file": "Bach Prelude and Fugue No.21 B1.pkl",
+    "section": "train"
+  },
+  "VaqWF70DjYs": {
+    "id": "VaqWF70DjYs",
+    "label_file": "Bach Prelude and Fugue No.22 B1.pkl",
+    "section": "train"
+  },
+  "m2yadhLP8H8": {
+    "id": "m2yadhLP8H8",
+    "label_file": "Bach Prelude and Fugue No.23 B1.pkl",
+    "section": "train"
+  },
+  "wRJlm0lCyoI": {
+    "id": "wRJlm0lCyoI",
+    "label_file": "Bach Prelude and Fugue No.24 B1.pkl",
+    "section": "train"
+  },
+  "u5nBBJndN3I": {
+    "id": "u5nBBJndN3I",
+    "label_file": "Bach Prelude and Fugue No.1 B2.pkl",
+    "section": "test"
+  },
+  "nwwHuxHMIpc": {
+    "id": "nwwHuxHMIpc",
+    "label_file": "Bach Prelude and Fugue No.2 B2.pkl",
+    "section": "test"
+  },
+  "ra1jf2nzJPg": {
+    "id": "ra1jf2nzJPg",
+    "label_file": "Bach Prelude and Fugue No.3 B2.pkl",
+    "section": "test"
+  }
+}
