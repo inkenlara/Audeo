@@ -3,25 +3,26 @@ import numpy as np
 import pretty_midi
 import glob
 import librosa
+import soundfile as sf
 # Synthesizing Audio using Fluid Synth
 class MIDISynth():
     def __init__(self, out_folder, video_name, instrument, midi=True):
         self.video_name = video_name
         # synthesize midi or roll
         self.midi = midi
-        # synthsized output dir, change to your own path
-        self.syn_dir = '/Midi_Synth/testing/'
+        # synthesized output dir, using relative path
+        self.syn_dir = 'data/synthesized'
         self.min_key = 15
         self.max_key = 65
         self.frame = 50
         self.piano_keys = 88
         if self.midi:
             self.midi_out_folder = out_folder + video_name
-            self.syn_dir = self.syn_dir + 'w_Roll2Midi/'
+            self.syn_dir = os.path.join(self.syn_dir, 'midi')
             self.process_midi()
         else:
             self.est_roll_folder = out_folder + video_name
-            self.syn_dir = self.syn_dir + 'wo_Roll2Midi/'
+            self.syn_dir = os.path.join(self.syn_dir, 'roll')
             self.process_roll()
         self.spf = 0.04 # second per frame
         self.sample_rate = 16000
@@ -30,10 +31,10 @@ class MIDISynth():
     def process_roll(self):
         self.wo_Roll2Midi_data = []
         self.est_roll_files = glob.glob(self.est_roll_folder + '/*.npz')
-        self.est_roll_files.sort(key=lambda x: int(x.split('/')[7].split('.')[0].split('-')[0]))
+        self.est_roll_files.sort(key=lambda x: int(os.path.basename(x).split('-')[0]))
 
         # Use the Roll prediction for Synthesis
-        print("need to process {0} files".format(len(self.est_roll_folder)))
+        print("need to process {0} files".format(len(self.est_roll_files)))
         for i in range(len(self.est_roll_files)):
             with np.load(self.est_roll_files[i]) as data:
                 est_roll = data['roll']
@@ -63,15 +64,18 @@ class MIDISynth():
     def process_midi(self):
         self.w_Roll2Midi_data = []
         self.infer_out_files = glob.glob(self.midi_out_folder + '/*.npz')
-        self.infer_out_files.sort(key=lambda x: int(x.split('/')[7].split('.')[0].split('-')[0]))
+        self.infer_out_files.sort(key=lambda x: int(os.path.basename(x).split('-')[0]))
 
         # Use the Midi prediction for Synthesis
         for i in range(len(self.infer_out_files)):
             with np.load(self.infer_out_files[i]) as data:
                 est_midi = data['midi']
-                target = np.zeros((self.frame, self.piano_keys))
-                target[:est_midi.shape[0], self.min_key:self.max_key+1] = est_midi
-                est_midi = target
+                # The input data is already in the correct piano key range (88 keys)
+                # Just ensure the frame dimension matches
+                if est_midi.shape[0] != self.frame:
+                    target = np.zeros((self.frame, est_midi.shape[1]))
+                    target[:est_midi.shape[0], :] = est_midi
+                    est_midi = target
                 est_midi = np.where(est_midi > 0, 1, 0)
             self.w_Roll2Midi_data.append(est_midi)
         self.complete_w_Roll2Midi_midi = np.concatenate(self.w_Roll2Midi_data)
@@ -114,19 +118,17 @@ class MIDISynth():
                 merged_list = [(start[i], end[i]) for i in range(0, len(start))]
                 self.wo_Roll2Midi_notes[21 + i] = merged_list
 
-
-
     def Synthesize(self):
         if self.midi:
             wav = self.generate_midi(self.w_Roll2Midi_notes, self.ins)
             path = self.create_output_dir()
             out_file = path + f'/Midi-{self.video_name}-{self.ins}.wav'
-            librosa.output.write_wav(out_file, wav, sr=self.sample_rate)
+            sf.write(out_file, wav, self.sample_rate)
         else:
             wav = self.generate_midi(self.wo_Roll2Midi_notes, self.ins)
             path = self.create_output_dir()
             out_file = path + f'/Roll-{self.video_name}-{self.ins}.wav'
-            librosa.output.write_wav(out_file, wav, sr=self.sample_rate)
+            sf.write(out_file, wav, self.sample_rate)
 
     def generate_midi(self, notes, ins):
         pm = pretty_midi.PrettyMIDI(initial_tempo=80)
