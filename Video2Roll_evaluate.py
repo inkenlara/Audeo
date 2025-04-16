@@ -70,12 +70,12 @@ def _prf_divide(numerator, denominator, zero_division="warn"):
         return result
 
 if __name__ == "__main__":
-    model_path = './models/Video2Roll.pth'
+    model_path = './data_provided/Video2Roll_models/Video2RollNet.pth'
     device = torch.device('cuda')
     net = Video2RollNet.resnet18()
     # net = torch.nn.DataParallel(net)
     net.cuda()
-    net.load_state_dict(torch.load(model_path))
+    net.load_state_dict(torch.load(model_path, map_location=device))
     print(net)
     test_dataset = Video2RollDataset(subset='test')
     test_data_loader = DataLoader(test_dataset, batch_size=64)
