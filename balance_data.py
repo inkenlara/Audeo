@@ -3,7 +3,7 @@ import numpy as np
 import torch
 from torch.utils.data.sampler import Sampler
 
-LEN = 1000
+LEN = 20000
 
 class MultilabelBalancedRandomSampler(Sampler):
     """

@@ -15,7 +15,7 @@ min_key = 15
 max_key = 65
 
 class Roll2MidiDataset(Dataset):
-    def __init__(self, path='/home/neuralnet/segmentation_key', est_roll_path='/home/neuralnet/segmentation_key/estimate_Roll/',
+    def __init__(self, path='./data', est_roll_path='./data/estimate_Roll',
                     train=True,  device=DEFAULT_DEVICE):
         self.path = path
         self.est_roll_path = est_roll_path
@@ -52,12 +52,16 @@ class Roll2MidiDataset(Dataset):
         print(test_gt_folders)
 
         # Roll predictions dir
-        train_roll_folder = glob.glob(self.est_roll_path + 'training/*')
+        train_roll_folder = glob.glob(self.est_roll_path + '/training/*')
         train_roll_folder.sort(key=lambda x: int(x.split(' ')[4].split('.')[1]))
         print(train_roll_folder)
-        test_roll_folder = glob.glob(self.est_roll_path + 'testing/*')
+        test_roll_folder = glob.glob(self.est_roll_path + '/testing/*')
         test_roll_folder.sort(key=lambda x: int(x.split(' ')[4].split('.')[1]))
         print(test_roll_folder)
+
+        # Filter out folder 10
+        train_gt_folders = [f for f in train_gt_folders if not f.endswith('No.10 B1')]
+        train_roll_folder = [f for f in train_roll_folder if not f.endswith('No.10 B1')]
 
         # self.folders: dictionary
         # key: train/test, values: list of tuples [(ground truth midi folder name, roll prediction folder name)]
@@ -81,9 +85,10 @@ class Roll2MidiDataset(Dataset):
         # load training data
         for train_gt_folder, est_roll_folder in self.folders['train']:
             gt_files = glob.glob(train_gt_folder + '/*.npz')
-            gt_files.sort(key=lambda x: int(x.split('/')[7].split('.')[0].split('-')[0]))
+            # Sort by the first number in the filename (e.g., "6494-6544.npz" -> 6494)
+            gt_files.sort(key=lambda x: int(x.split('/')[-1].split('.')[0].split('-')[0]))
             est_roll_files = glob.glob(est_roll_folder + '/*.npz')
-            est_roll_files.sort(key=lambda x: int(x.split('/')[7].split('.')[0].split('-')[0]))
+            est_roll_files.sort(key=lambda x: int(x.split('/')[-1].split('.')[0].split('-')[0]))
             print("have the same files of training gt and est roll:", len(gt_files) == len(est_roll_files))
             for i in range(len(gt_files)):
                 with np.load(gt_files[i]) as data:
@@ -114,9 +119,9 @@ class Roll2MidiDataset(Dataset):
         # load testing data
         for test_gt_folder, est_roll_folder in self.folders['test']:
             gt_files = glob.glob(test_gt_folder + '/*.npz')
-            gt_files.sort(key=lambda x: int(x.split('/')[7].split('.')[0].split('-')[0]))
+            gt_files.sort(key=lambda x: int(x.split('/')[-1].split('.')[0].split('-')[0]))
             est_roll_files = glob.glob(est_roll_folder + '/*.npz')
-            est_roll_files.sort(key=lambda x: int(x.split('/')[7].split('.')[0].split('-')[0]))
+            est_roll_files.sort(key=lambda x: int(x.split('/')[-1].split('.')[0].split('-')[0]))
             print("have the same files of testing midi and roll:", len(gt_files) == len(est_roll_files))
             for i in range(len(gt_files)):
                 with np.load(gt_files[i]) as data:

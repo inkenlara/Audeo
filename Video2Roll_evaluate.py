@@ -70,7 +70,7 @@ def _prf_divide(numerator, denominator, zero_division="warn"):
         return result
 
 if __name__ == "__main__":
-    model_path = './models/BCE_5f_FAN.pth'
+    model_path = './models/Video2Roll.pth'
     device = torch.device('cuda')
     net = Video2RollNet.resnet18()
     # net = torch.nn.DataParallel(net)

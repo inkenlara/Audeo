@@ -11,13 +11,13 @@ transform = transforms.Compose([lambda x: x.resize((900,100)),
                                lambda x: x/255.])
 
 # video images root dir, change to your path
-img_root='./input_images'
+img_root='./data/input_images'
 # labels root dir, change to your path
-label_root='./labels'
+label_root='./data/labels'
 # midi ground truth root dir, change to your path
-midi_root = './midi'
+midi_root = './data/midi'
 # Roll prediction output, change to your path
-est_roll_root = './estimate_Roll'
+est_roll_root = './data/estimate_Roll'
 
 # the range of Piano keys (maximum is 88), depending on your data
 min_key = 15
@@ -25,22 +25,22 @@ max_key = 65
 
 def load_data(img_folder, label_file,midi_folder):
     img_files = glob.glob(img_folder + '/*.jpg')
-    img_files.sort(key=lambda x: int(x.split('/')[4].split('.')[0][5:]))
+    img_files.sort(key=lambda x: int(os.path.basename(x).split('_')[1].split('.')[0]))
     labels = np.load(label_file, allow_pickle=True)
     # Midi info for every video is divided into multiple npz files
     # each npz contains 2 seconds (50 frames) Midi information
     # format: frame_{i}-frame_{i+50}.npz
     midi_files = glob.glob(midi_folder + '/*.npz')
-    midi_files.sort(key=lambda x: int(x.split('/')[4].split('.')[0].split('-')[0]))
+    midi_files.sort(key=lambda x: int(os.path.basename(x).split('-')[0]))
     intervals = []
     for file in midi_files:
-        interval = file.split('/')[4].split('.')[0].split('-')
+        interval = os.path.basename(file).split('.')[0].split('-')
         start = int(interval[0])
         end = int(interval[1])
         intervals.append([start, end])
     data = []
     for i, file in enumerate(img_files):
-        key = int(file.split('/')[4].split('.')[0][5:])
+        key = int(os.path.basename(file).split('_')[1].split('.')[0])
         label = np.where(labels[key] > 0, 1, 0)
         new_label = label[min_key:max_key + 1]
         if i >= 2 and i < len(img_files) - 2:
@@ -100,7 +100,7 @@ def torch_preprocess(input_file_list, label):
 
 
 if __name__ == "__main__":
-    model_path = './models/BCE_5f_FAN.pth' # change to your path
+    model_path = './models/Video2Roll.pth'
     device = torch.device('cuda')
     net = Video2RollNet.resnet18()
     net.cuda()
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     training_data = False
     # infer Roll predictions
     if training_data:
-        for i in range(1, 25):
+        for i in [x for x in range(1, 25) if x != 10]:
             video_name = f'Bach Prelude and Fugue No.{i} B1'
             img_folder = img_root + '/training/'+ video_name
             label_folder = label_root + '/training/'+ video_name+'.pkl'

@@ -62,6 +62,13 @@ class Video2RollDataset(Dataset):
         train_label_folder = sorted(glob.glob(self.label_root + '/training/*'))
         test_label_folder = sorted(glob.glob(self.label_root + '/testing/*'))
 
+        # Filter out folders 7, 8, 10, 11, 12 from training data
+        excluded_folders = ['Bach Prelude and Fugue No.7 B1', 'Bach Prelude and Fugue No.8 B1', 
+                          'Bach Prelude and Fugue No.10 B1', 'Bach Prelude and Fugue No.11 B1',
+                          'Bach Prelude and Fugue No.12 B1']
+        train_img_folder = [f for f in train_img_folder if not any(excluded in f for excluded in excluded_folders)]
+        train_label_folder = [f for f in train_label_folder if not any(excluded in f for excluded in excluded_folders)]
+
         self.folders['train'] = [(train_img_folder[i], train_label_folder[i]) for i in range(len(train_img_folder))]
         print(self.folders['train'])
         self.folders['test'] = [(test_img_folder[i], test_label_folder[i]) for i in range(len(test_img_folder))]
@@ -73,10 +80,10 @@ class Video2RollDataset(Dataset):
 
         # === Training Data ===
         for img_folder, label_file in self.folders['train']:
-            img_files = sorted(glob.glob(img_folder + '/*.jpg'), key=lambda x: int(os.path.basename(x)[5:-4]))
+            img_files = sorted(glob.glob(img_folder + '/*.jpg'), key=lambda x: int(os.path.basename(x).replace('_', '')[5:-4]))
             labels = np.load(label_file, allow_pickle=True)
             for i, file in enumerate(img_files):
-                key = int(os.path.basename(file)[5:-4])
+                key = int(os.path.basename(file).replace('_', '')[5:-4])
                 label = np.where(labels[key] > 0, 1, 0)
                 if not np.any(label):
                     count_zero += 1
@@ -91,10 +98,10 @@ class Video2RollDataset(Dataset):
         # === Test Data ===
         count_zero = 0
         for img_folder, label_file in self.folders['test']:
-            img_files = sorted(glob.glob(img_folder + '/*.jpg'), key=lambda x: int(os.path.basename(x)[5:-4]))
+            img_files = sorted(glob.glob(img_folder + '/*.jpg'), key=lambda x: int(os.path.basename(x).replace('_', '')[5:-4]))
             labels = np.load(label_file, allow_pickle=True)
             for i, file in enumerate(img_files):
-                key = int(os.path.basename(file)[5:-4])
+                key = int(os.path.basename(file).replace('_', '')[5:-4])
                 label = np.where(labels[key] > 0, 1, 0)
                 if not np.any(label):
                     count_zero += 1
