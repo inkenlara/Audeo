@@ -82,7 +82,7 @@ def natural_sort_key(s):
     return [int(text) if text.isdigit() else text.lower()
             for text in re.split('([0-9]+)', s)]
 
-def process_video(frames_dir, set_type, index, output_dir):
+def process_video(frames_dir, set_type, index, output_dir, midi_folder, midi):
     """
     Process a single video: synthesize audio and create video with audio.
     
@@ -91,6 +91,8 @@ def process_video(frames_dir, set_type, index, output_dir):
         set_type: 'training' or 'testing'
         index: Index number for the video
         output_dir: Directory to save the output
+        midi_folder: Directory containing the midi or roll files
+        midi: True or False (True for midi, False for roll)
     """
     # Get the video name from the frames directory
     video_name = os.path.basename(frames_dir)
@@ -104,8 +106,8 @@ def process_video(frames_dir, set_type, index, output_dir):
     
     # Step 1: Synthesize audio
     print("Synthesizing audio...")
-    midi_folder = f"data_provided/midi/{set_type}/"
-    midi_synth = MIDISynth(midi_folder, video_name, "Acoustic Grand Piano", midi=True)
+    midi_folder = f"{midi_folder}/{set_type}/"
+    midi_synth = MIDISynth(midi_folder, video_name, "Acoustic Grand Piano", midi=midi)
     midi_synth.GetNote()
     midi_synth.Synthesize()
     
@@ -113,8 +115,10 @@ def process_video(frames_dir, set_type, index, output_dir):
     video_only_path = os.path.join(output_dir, "videos", f"{safe_name}_video_only.mp4")
     create_video(frames_dir, video_only_path)
     
+    audio_type = "midi" if midi else "roll"
     # Step 3: Add audio to video
-    audio_file = os.path.join("data", "synthesized", "midi", video_name, f"Midi-{video_name}-Acoustic Grand Piano.wav")
+    prefix = "Midi" if midi else "Roll"
+    audio_file = os.path.join("data", "synthesized", audio_type, video_name, f"{prefix}-{video_name}-Acoustic Grand Piano.wav")
     video_with_audio_path = os.path.join(output_dir, "videos", f"{safe_name}.mp4")
     add_audio_to_video(video_only_path, audio_file, video_with_audio_path)
     
@@ -126,16 +130,18 @@ def process_video(frames_dir, set_type, index, output_dir):
 def main():
     # Base directories
     input_base_dir = "data/input_images"
-    output_base_dir = "data/generated"
+    output_base_dir = "data/generated/video2roll"
+    midi_folder = "data/estimate_Roll"
+    midi = False
     
-    # Process training videos
-    training_dir = os.path.join(input_base_dir, "training")
-    if os.path.exists(training_dir):
-        training_videos = sorted([d for d in os.listdir(training_dir) if os.path.isdir(os.path.join(training_dir, d))], 
-                               key=natural_sort_key)
-        for i, video_dir in enumerate(training_videos, 1):
-            frames_dir = os.path.join(training_dir, video_dir)
-            process_video(frames_dir, "training", i, output_base_dir)
+    # # Process training videos
+    # training_dir = os.path.join(input_base_dir, "training")
+    # if os.path.exists(training_dir):
+    #     training_videos = sorted([d for d in os.listdir(training_dir) if os.path.isdir(os.path.join(training_dir, d))], 
+    #                            key=natural_sort_key)
+    #     for i, video_dir in enumerate(training_videos, 1):
+    #         frames_dir = os.path.join(training_dir, video_dir)
+    #         process_video(frames_dir, "training", i, output_base_dir)
     
     # Process testing videos
     testing_dir = os.path.join(input_base_dir, "testing")
@@ -144,7 +150,7 @@ def main():
                               key=natural_sort_key)
         for i, video_dir in enumerate(testing_videos, 1):
             frames_dir = os.path.join(testing_dir, video_dir)
-            process_video(frames_dir, "testing", i, output_base_dir)
+            process_video(frames_dir, "testing", i, output_base_dir, midi_folder, midi)
 
 if __name__ == "__main__":
     main() 
