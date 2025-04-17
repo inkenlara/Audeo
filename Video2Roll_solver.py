@@ -3,11 +3,14 @@ import numpy as np
 import torch
 from sklearn import metrics
 from sklearn.metrics import _classification
+import os
 
 class Solver(object):
 
-    def __init__(self, data_loader, test_data_loader, model, criterion, optimizer, lr_scheduler, epochs):
-        self.save_model_path = './models/Video2Roll.pth' # change to your path
+    def __init__(self, data_loader, test_data_loader, model, criterion, optimizer, lr_scheduler, epochs, model_save_path=None):
+        self.save_model_path = model_save_path if model_save_path else './models/Video2Roll.pth'
+        # Create directory if it doesn't exist
+        os.makedirs(os.path.dirname(self.save_model_path), exist_ok=True)
         self.test_loader = test_data_loader
         self.data_loader = data_loader
         self.net = model

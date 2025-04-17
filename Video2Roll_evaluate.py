@@ -77,7 +77,11 @@ if __name__ == "__main__":
     net.cuda()
     net.load_state_dict(torch.load(model_path, map_location=device))
     print(net)
-    test_dataset = Video2RollDataset(subset='test')
+    test_dataset = Video2RollDataset(
+        img_root='./data_hq/input_images',
+        label_root='./data_hq/labels',
+        subset='test'
+    )
     test_data_loader = DataLoader(test_dataset, batch_size=64)
     net.eval()
     criterion=nn.BCEWithLogitsLoss()
