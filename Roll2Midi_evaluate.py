@@ -111,8 +111,8 @@ def _prf_divide(numerator, denominator, zero_division="warn"):
         return result
 
 if __name__ == "__main__":
-    est_midi_folder = '/home/neuralnet/segmentation_key/estimate_Roll/testing/'
-    exp_dir = os.path.join(os.path.abspath('./experiments'), 'exp_5')
+    est_midi_folder = 'data/estimate_Roll/testing/'
+    exp_dir = 'data_provided/Roll2Midi_models/Roll2Midi_model'
     with open(os.path.join(exp_dir,'hyperparams.json'), 'r') as hpfile:
         hp = json.load(hpfile)
     print(hp['best_loss'])

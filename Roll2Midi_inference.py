@@ -19,8 +19,8 @@ class Midi_Generation():
         self.video_name = video_name
         # the Roll prediction folder
         self.est_roll_folder = est_roll_folder + video_name
-        # Midi output dir
-        self.infer_out_dir = '/home/neuralnet/MIDI_GAN/Roll2Midi_results/testing'
+        # Midi output dir - changed to local directory
+        self.infer_out_dir = '.data/Roll2Midi_results/testing'
 
         self.min_key = 15
         self.max_key = 65
@@ -31,8 +31,8 @@ class Midi_Generation():
         self.data = []
         self.final_data = []
         self.est_roll_files = glob.glob(est_roll_folder + '/*.npz')
-        self.est_roll_files.sort(key=lambda x: int(x.split('/')[7].split('.')[0].split('-')[0]))
-        print("need to infer {0} files".format(len(est_roll_folder)))
+        self.est_roll_files.sort(key=lambda x: int(x.split('/')[-1].split('.')[0].split('-')[0]))
+        print("need to infer {0} files".format(len(self.est_roll_files)))
         for i in range(len(self.est_roll_files)):
             with np.load(self.est_roll_files[i]) as data:
                 est_roll = data['logit'][:,self.min_key:self.max_key+1]
@@ -84,17 +84,23 @@ class Midi_Generation():
         return midi_out_dir
 
 if __name__ == "__main__":
-    # example for generating the Midi output from training Roll predictions
-    est_roll_folder = './estimate_Roll/testing/'
-    exp_dir = os.path.join(os.path.abspath('./experiments'), 'exp_5')
+    # Updated paths to match your setup
+    est_roll_folder = './data/estimate_Roll/testing/'
+    exp_dir = './models/Correct_Roll2MidiNet'
+    
+    # Load hyperparameters to get best epoch
     with open(os.path.join(exp_dir,'hyperparams.json'), 'r') as hpfile:
         hp = json.load(hpfile)
     print("the best loss:", hp['best_loss'])
     print("the best epoch:", hp['best_epoch'])
 
     checkpoints = 'checkpoint-{}.tar'.format(hp['best_epoch'])
-    for i in range(1, 4):
-        video_name = f'Bach Prelude and Fugue No.{i} B2'
+    
+    # Get list of video folders in the estimate_Roll/testing directory
+    video_folders = [f for f in os.listdir(est_roll_folder) if os.path.isdir(os.path.join(est_roll_folder, f))]
+    
+    for video_name in video_folders:
+        print(f"Processing {video_name}...")
         generator = Midi_Generation(checkpoints, exp_dir, est_roll_folder, video_name)
         generator.inference()
 

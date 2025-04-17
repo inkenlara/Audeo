@@ -193,7 +193,7 @@ def main():
 
     try:
         # the dir to save the Roll2Midi model
-        exp_root = os.path.join(os.path.abspath('./'), 'Correct_Roll2Midi_experiments')
+        exp_root = os.path.join(os.path.abspath('./'), 'models')
         os.makedirs(exp_root)
     except FileExistsError:
         pass
