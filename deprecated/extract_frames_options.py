@@ -73,7 +73,7 @@ def option_1(video_path, output_dir, coords):
     return frame_count
 
 
-# option 2: for av1
+# option 2: for av1, TODO: starts with 1, not 0
 def extract_frames(video_path, output_dir, coords):
     """Extract and crop frames using ffmpeg (works with AV1 videos)"""
     if not os.path.exists(video_path):

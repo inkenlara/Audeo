@@ -18,37 +18,6 @@ os.makedirs('data_hq/midi', exist_ok=True)
 os.makedirs('data_hq/labels', exist_ok=True)
 os.makedirs('data_hq/input_images', exist_ok=True)
 
-def create_video_mapping():
-    """Create mapping between video IDs and their titles"""
-    mapping = {}
-    
-    # Read video IDs from Video_Id.md
-    with open('Video_Id.md', 'r') as f:
-        lines = f.readlines()
-    
-    current_section = None
-    for line in lines:
-        line = line.strip()
-        if line.startswith('# Training'):
-            current_section = 'training'
-        elif line.startswith('# Testing'):
-            current_section = 'testing'
-        elif line.startswith('- https://youtu.be/'):
-            # Extract video ID from the URL
-            video_id = line.split('/')[-1].strip()
-            if not video_id:  # Skip empty lines
-                continue
-            mapping[video_id] = {
-                'section': current_section,
-                'label_file': f"{line.split('#')[1].strip()}.pkl" if '#' in line else f"{video_id}.pkl"
-            }
-    
-    # Save mapping to file
-    with open('video_mapping.json', 'w') as f:
-        json.dump(mapping, f, indent=2)
-    
-    return mapping
-
 # TODO: only works for some videos, does not work for videos ['_3qnL9ddHuw', 'HB8-w5CvMls', 'PIS76X17Mf8', 'vHi3_k4XOrA']
 def extract_frames(video_path, output_dir, coords):
     """Extract and crop frames from video"""
@@ -157,8 +126,18 @@ def download_videos(video_ids, output_dir):
 
 def get_labeled_frames(label_file):
     """Get the set of frame numbers that have labels"""
+    print(f"\nDebugging label file: {label_file}")
     with open(label_file, 'rb') as f:
         labels = pickle.load(f)
+    
+    # Print some debug information
+    print(f"Total number of labeled frames: {len(labels)}")
+    if labels:
+        first_key = next(iter(labels.keys()))
+        print(f"First frame number: {first_key}")
+        print(f"First frame data type: {type(first_key)}")
+        print(f"First frame data structure: {labels[first_key]}")
+    
     return set(labels.keys())
 
 def copy_labeled_frames(input_dir, output_dir, labeled_frames):
@@ -179,99 +158,7 @@ def copy_labeled_frames(input_dir, output_dir, labeled_frames):
                 os.path.join(output_dir, frame_file)
             )
 
-def prepare_final_dataset(video_mapping):
-    """Prepare the final dataset with only labeled frames"""
-    # Create directory structure
-    base_dir = 'data_hq'
-    os.makedirs(os.path.join(base_dir, 'input_images', 'training'), exist_ok=True)
-    os.makedirs(os.path.join(base_dir, 'input_images', 'testing'), exist_ok=True)
-    os.makedirs(os.path.join(base_dir, 'labels', 'training'), exist_ok=True)
-    os.makedirs(os.path.join(base_dir, 'labels', 'testing'), exist_ok=True)
-    
-    # Process training data
-    train_videos = [d for d in os.listdir('data_hq/frames/training') 
-                   if os.path.isdir(os.path.join('data_hq/frames/training', d))]
-    
-    for video_id in train_videos:
-        if video_id not in video_mapping:
-            print(f"Warning: No mapping found for video {video_id}")
-            continue
-            
-        video_info = video_mapping[video_id]
-        if video_info['section'] != 'training':
-            continue
-            
-        label_file_name = video_info['label_file']
-        output_dir = os.path.join(base_dir, 'input_images', 'training', label_file_name[:-4])  # Remove .pkl
-        
-        # Skip if output directory already exists
-        if os.path.exists(output_dir):
-            print(f"Skipping {video_id} - output directory already exists")
-            continue
-            
-        print(f"Processing training video: {video_id} -> {label_file_name}")
-        
-        # Get frames that have labels
-        label_file = os.path.join('data_provided/labels/training', label_file_name)
-        if not os.path.exists(label_file):
-            print(f"Warning: Label file not found for {label_file_name}")
-            continue
-            
-        labeled_frames = get_labeled_frames(label_file)
-        print(f"Found {len(labeled_frames)} labeled frames")
-        
-        # Copy only frames that have labels
-        input_dir = os.path.join('data_hq/frames/training', video_id)
-        copy_labeled_frames(input_dir, output_dir, labeled_frames)
-        
-        # Copy label file
-        output_label = os.path.join(base_dir, 'labels', 'training', label_file_name)
-        shutil.copy2(label_file, output_label)
-    
-    # Process testing data
-    test_videos = [d for d in os.listdir('data_hq/frames/testing') 
-                  if os.path.isdir(os.path.join('data_hq/frames/testing', d))]
-    
-    for video_id in test_videos:
-        if video_id not in video_mapping:
-            print(f"Warning: No mapping found for video {video_id}")
-            continue
-            
-        video_info = video_mapping[video_id]
-        if video_info['section'] != 'testing':
-            continue
-            
-        label_file_name = video_info['label_file']
-        output_dir = os.path.join(base_dir, 'input_images', 'testing', label_file_name[:-4])  # Remove .pkl
-        
-        # Skip if output directory already exists
-        if os.path.exists(output_dir):
-            print(f"Skipping {video_id} - output directory already exists")
-            continue
-            
-        print(f"Processing testing video: {video_id} -> {label_file_name}")
-        
-        # Get frames that have labels
-        label_file = os.path.join('data_provided/labels/testing', label_file_name)
-        if not os.path.exists(label_file):
-            print(f"Warning: Label file not found for {label_file_name}")
-            continue
-            
-        labeled_frames = get_labeled_frames(label_file)
-        print(f"Found {len(labeled_frames)} labeled frames")
-        
-        # Copy only frames that have labels
-        input_dir = os.path.join('data_hq/frames/testing', video_id)
-        copy_labeled_frames(input_dir, output_dir, labeled_frames)
-        
-        # Copy label file
-        output_label = os.path.join(base_dir, 'labels', 'testing', label_file_name)
-        shutil.copy2(label_file, output_label)
-
 def main():
-    # Create video mapping
-    print("Creating video mapping...")
-    video_mapping = create_video_mapping()
     
     # Get video IDs from Video_Id.md
     with open('Video_Id.md', 'r') as f:
@@ -299,27 +186,38 @@ def main():
     
     print(f"Found {len(train_videos)} training videos and {len(test_videos)} testing videos")
     
-    # Only process specific videos that need frame extraction
-    videos_to_process = ['_3qnL9ddHuw', 'HB8-w5CvMls', 'PIS76X17Mf8', 'vHi3_k4XOrA']
+    # Download and process videos
+    # if train_videos:
+    #     print("Downloading training videos...")
+    #     download_videos(train_videos, 'data_hq/videos/training')
+    # else:
+    #     print("No training videos found!")
     
-    # Process videos
-    for video_id, coords in zip(train_videos, train_piano_coords):
-        if video_id not in videos_to_process:
-            continue
-            
-        video_path = f'data_hq/videos/training/{video_id}.mp4'
-        frames_dir = f'data_hq/frames/training/{video_id}'
-        os.makedirs(frames_dir, exist_ok=True)
+    # if test_videos:
+    #     print("Downloading testing videos...")
+    #     download_videos(test_videos, 'data_hq/videos/testing')
+    # else:
+    #     print("No testing videos found!")
+    
+    # Extract frames from videos
+    # for video_id, coords in zip(train_videos, train_piano_coords):
+    #     video_path = f'data_hq/videos/training/{video_id}.mp4'
+    #     frames_dir = f'data_hq/frames/training/{video_id}'
+    #     os.makedirs(frames_dir, exist_ok=True)
         
-        print(f"Processing training video {video_id}...")
-        frame_count = extract_frames(video_path, frames_dir, coords)
-        print(f"Extracted {frame_count} frames from video {video_id}")
+    #     print(f"Processing training video {video_id}...")
+    #     frame_count = extract_frames(video_path, frames_dir, coords)
+    #     print(f"Extracted {frame_count} frames from video {video_id}")
     
-    # Skip final dataset preparation for now
-    # print("\nPreparing final dataset...")
-    # prepare_final_dataset(video_mapping)
-    
-    print("\nFrame extraction complete!")
+    # for video_id, coords in zip(test_videos, test_piano_coords):
+    #     video_path = f'data_hq/videos/testing/{video_id}.mp4'
+    #     frames_dir = f'data_hq/frames/testing/{video_id}'
+    #     os.makedirs(frames_dir, exist_ok=True)
+        
+    #     print(f"Processing testing video {video_id}...")
+    #     frame_count = extract_frames(video_path, frames_dir, coords)
+    #     print(f"Extracted {frame_count} frames from video {video_id}")
+
 
 if __name__ == '__main__':
     main() 

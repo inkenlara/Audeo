@@ -129,10 +129,10 @@ def process_video(frames_dir, set_type, index, output_dir, midi_folder, midi):
 
 def main():
     # Base directories
-    input_base_dir = "data/input_images"
-    output_base_dir = "data/generated/video2roll"
-    midi_folder = "data/estimate_Roll"
-    midi = False
+    input_base_dir = "data_hq/input_images"
+    output_base_dir = "data_hq/generated/gt"
+    midi_folder = "data_provided/midi"
+    midi = True
     
     # Process training videos
     training_dir = os.path.join(input_base_dir, "training")
@@ -141,7 +141,7 @@ def main():
                                key=natural_sort_key)
         for i, video_dir in enumerate(training_videos, 1):
             frames_dir = os.path.join(training_dir, video_dir)
-            process_video(frames_dir, "training", i, output_base_dir)
+            process_video(frames_dir, "training", i, output_base_dir, midi_folder, midi)
     
     # Process testing videos
     testing_dir = os.path.join(input_base_dir, "testing")

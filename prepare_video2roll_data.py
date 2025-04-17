@@ -38,15 +38,15 @@ def main():
     video_mapping = load_video_mapping()
     
     # Create directory structure
-    base_dir = 'data'
+    base_dir = 'data_hq'
     os.makedirs(os.path.join(base_dir, 'input_images', 'training'), exist_ok=True)
     os.makedirs(os.path.join(base_dir, 'input_images', 'testing'), exist_ok=True)
     os.makedirs(os.path.join(base_dir, 'labels', 'training'), exist_ok=True)
     os.makedirs(os.path.join(base_dir, 'labels', 'testing'), exist_ok=True)
     
     # Process training data
-    train_videos = [d for d in os.listdir('data/frames/training') 
-                   if os.path.isdir(os.path.join('data/frames/training', d))]
+    train_videos = [d for d in os.listdir('data_hq/frames/training') 
+                   if os.path.isdir(os.path.join('data_hq/frames/training', d))]
     
     for video_id in train_videos:
         if video_id not in video_mapping:
@@ -77,7 +77,7 @@ def main():
         print(f"Found {len(labeled_frames)} labeled frames")
         
         # Copy only frames that have labels
-        input_dir = os.path.join('data/frames/training', video_id)
+        input_dir = os.path.join('data_hq/frames/training', video_id)
         copy_labeled_frames(input_dir, output_dir, labeled_frames)
         
         # Copy label file
@@ -85,8 +85,8 @@ def main():
         shutil.copy2(label_file, output_label)
     
     # Process testing data
-    test_videos = [d for d in os.listdir('data/frames/testing') 
-                  if os.path.isdir(os.path.join('data/frames/testing', d))]
+    test_videos = [d for d in os.listdir('data_hq/frames/testing') 
+                  if os.path.isdir(os.path.join('data_hq/frames/testing', d))]
     
     for video_id in test_videos:
         if video_id not in video_mapping:
@@ -117,7 +117,7 @@ def main():
         print(f"Found {len(labeled_frames)} labeled frames")
         
         # Copy only frames that have labels
-        input_dir = os.path.join('data/frames/testing', video_id)
+        input_dir = os.path.join('data_hq/frames/testing', video_id)
         copy_labeled_frames(input_dir, output_dir, labeled_frames)
         
         # Copy label file
